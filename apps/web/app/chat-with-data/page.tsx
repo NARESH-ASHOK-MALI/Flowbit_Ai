@@ -15,8 +15,6 @@ export default function ChatWithDataPage() {
   const [input, setInput] = useState('')
   const [loading, setLoading] = useState(false)
 
-  const apiBase = process.env.NEXT_PUBLIC_API_BASE || 'http://localhost:3001'
-
   // Helper to format values (especially numbers/currency)
   const formatValue = (key: string, value: any): string => {
     if (value === null || value === undefined) return 'N/A'
@@ -45,7 +43,7 @@ export default function ChatWithDataPage() {
     setLoading(true)
 
     try {
-      const response = await fetch(`${apiBase}/chat-with-data`, {
+      const response = await fetch('/api/chat-with-data', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ query: input }),

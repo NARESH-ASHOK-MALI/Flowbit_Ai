@@ -94,7 +94,7 @@ Columns:
   - "category" (string)
   - "createdAt" (timestamp)
 """
-
+#...
 @app.get("/")
 def root():
     return {"message": "Vanna AI Service", "status": "running"}

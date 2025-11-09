@@ -23,12 +23,10 @@ export function InvoicesTable() {
   const [sortDirection, setSortDirection] = useState<SortDirection>('desc')
   const [loading, setLoading] = useState(true)
 
-  const apiBase = process.env.NEXT_PUBLIC_API_BASE || 'http://localhost:3001'
-
   useEffect(() => {
     const fetchInvoices = async () => {
       try {
-        const response = await fetch(`${apiBase}/invoices`)
+        const response = await fetch('/api/invoices')
         const data = await response.json()
         setInvoices(data)
         setFilteredInvoices(data)
@@ -40,7 +38,7 @@ export function InvoicesTable() {
     }
 
     fetchInvoices()
-  }, [apiBase])
+  }, [])
 
   useEffect(() => {
     let filtered = invoices.filter(

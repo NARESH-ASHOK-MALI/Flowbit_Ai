@@ -138,49 +138,42 @@ This project is a comprehensive invoice analytics platform that combines:
 
 ## 📊 Database Schema
 
+The database consists of two main tables: `Invoice` (header) and `LineItem` (detail) with a one-to-many relationship.
+
 ### ER Diagram
 
+```mermaid
+erDiagram
+    Invoice ||--o{ LineItem : contains
+    
+    Invoice {
+        uuid id PK
+        string documentId UK
+        string invoiceId
+        datetime invoiceDate
+        string vendorName
+        decimal invoiceTotal
+        string status
+    }
+    
+    LineItem {
+        uuid id PK
+        uuid invoiceId FK
+        int srNo
+        string description
+        decimal quantity
+        decimal unitPrice
+        decimal totalPrice
+        string category
+    }
 ```
-┌─────────────────┐
-│    Invoice      │
-├─────────────────┤
-│ id (PK)         │
-│ documentId (UK) │
-│ invoiceId       │
-│ invoiceDate     │
-│ deliveryDate    │
-│ vendorName      │
-│ vendorAddress   │
-│ vendorTaxId     │
-│ customerName    │
-│ customerAddress │
-│ subTotal        │
-│ totalTax        │
-│ invoiceTotal    │
-│ currency        │
-│ status          │
-│ organizationId  │
-│ departmentId    │
-│ createdAt       │
-│ updatedAt       │
-└────────┬────────┘
-         │
-         │ 1:N
-         │
-┌────────▼────────┐
-│   LineItem     │
-├────────────────┤
-│ id (PK)        │
-│ invoiceId (FK) │
-│ srNo           │
-│ description    │
-│ quantity       │
-│ unitPrice      │
-│ totalPrice     │
-│ category       │
-│ createdAt      │
-└────────────────┘
-```
+
+**Key Relationships:**
+- **Invoice → LineItem**: One-to-Many (1:N)
+- Each invoice can have multiple line items
+- Foreign Key: `LineItem.invoiceId` → `Invoice.id`
+
+📄 **[View Full Schema Documentation](./ER_DIAGRAM.md)** - Detailed field descriptions, indexes, and sample queries
 
 ## 🔌 API Endpoints
 

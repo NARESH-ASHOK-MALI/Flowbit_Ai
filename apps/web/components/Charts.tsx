@@ -1,5 +1,7 @@
 'use client'
 
+import { useState } from 'react'
+import { Search } from 'lucide-react'
 import {
   LineChart,
   Line,
@@ -66,6 +68,19 @@ const CustomTooltip = ({ active, payload, label }: any) => {
 }
 
 export function Charts({ trends, topVendors, categorySpend, cashOutflow }: ChartsProps) {
+  const [vendorSearchQuery, setVendorSearchQuery] = useState('')
+  const [tableSearchQuery, setTableSearchQuery] = useState('')
+
+  // Filter vendors based on search query for chart
+  const filteredVendors = topVendors.filter(vendor =>
+    vendor.vendorName.toLowerCase().includes(vendorSearchQuery.toLowerCase())
+  )
+
+  // Filter vendors based on search query for table
+  const filteredTableVendors = topVendors.filter(vendor =>
+    vendor.vendorName.toLowerCase().includes(tableSearchQuery.toLowerCase())
+  )
+
   return (
     <div className="space-y-4">
       {/* First Row - 2 Charts */}
@@ -161,12 +176,28 @@ export function Charts({ trends, topVendors, categorySpend, cashOutflow }: Chart
 
       {/* Top Vendors Horizontal Bar Chart */}
       <div className="bg-white rounded-lg shadow-sm p-5 border border-gray-200 hover:shadow-md transition-shadow">
-        <h3 className="text-base font-semibold text-gray-900 mb-1">Spend by Vendor (Top 10)</h3>
-        <p className="text-xs text-gray-500 mb-4">Vendor spend with cumulative percentage distribution.</p>
+        <div className="flex items-center justify-between mb-1">
+          <h3 className="text-base font-semibold text-gray-900">Spend by Vendor (Top 10)</h3>
+          <div className="relative">
+            <Search className="absolute left-2 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+            <input
+              type="text"
+              placeholder="Search vendors..."
+              value={vendorSearchQuery}
+              onChange={(e) => setVendorSearchQuery(e.target.value)}
+              className="pl-8 pr-3 py-1 text-xs border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent w-40"
+            />
+          </div>
+        </div>
+        <p className="text-xs text-gray-500 mb-4">
+          {vendorSearchQuery 
+            ? `Showing ${filteredVendors.length} vendor${filteredVendors.length !== 1 ? 's' : ''} matching "${vendorSearchQuery}"`
+            : 'Vendor spend with cumulative percentage distribution.'}
+        </p>
         <ResponsiveContainer width="100%" height={280}>
           <ComposedChart 
-            data={topVendors.map(item => {
-              const maxSpend = Math.max(...topVendors.map(v => v.totalSpend))
+            data={filteredVendors.map(item => {
+              const maxSpend = Math.max(...filteredVendors.map(v => v.totalSpend))
               return {
                 ...item,
                 maxSpend: maxSpend
@@ -211,7 +242,7 @@ export function Charts({ trends, topVendors, categorySpend, cashOutflow }: Chart
               name="Total Spend (€)"
               barSize={30}
             >
-              {topVendors.map((entry, index) => (
+              {filteredVendors.map((entry, index) => (
                 <Cell key={`cell-${index}`} fill={index % 2 === 0 ? '#a855f7' : '#c084fc'} />
               ))}
             </Bar>
@@ -350,7 +381,24 @@ export function Charts({ trends, topVendors, categorySpend, cashOutflow }: Chart
 
       {/* Invoices by Vendor - Table */}
       <div className="bg-white rounded-lg shadow-sm p-5 border border-gray-200 hover:shadow-md transition-shadow">
-        <h3 className="text-base font-semibold text-gray-900 mb-4">Invoices by Vendor</h3>
+        <div className="flex items-center justify-between mb-3">
+          <h3 className="text-base font-semibold text-gray-900">Invoices by Vendor</h3>
+          <div className="relative">
+            <Search className="absolute left-2 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+            <input
+              type="text"
+              placeholder="Search vendors..."
+              value={tableSearchQuery}
+              onChange={(e) => setTableSearchQuery(e.target.value)}
+              className="pl-8 pr-3 py-1 text-xs border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent w-40"
+            />
+          </div>
+        </div>
+        {tableSearchQuery && (
+          <p className="text-xs text-gray-500 mb-2">
+            Showing {filteredTableVendors.length} of {topVendors.length} vendors
+          </p>
+        )}
         <div className="overflow-x-auto overflow-y-auto max-h-[280px]">
           <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-gray-50 sticky top-0 z-10">
@@ -367,19 +415,27 @@ export function Charts({ trends, topVendors, categorySpend, cashOutflow }: Chart
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
-              {topVendors.map((vendor, index) => (
-                <tr key={index} className="hover:bg-gray-50 transition-colors">
-                  <td className="px-3 py-3 text-sm text-gray-900 truncate max-w-[150px]">
-                    {vendor.vendorName}
-                  </td>
-                  <td className="px-3 py-3 text-sm text-gray-700 text-center">
-                    {vendor.invoiceCount}
-                  </td>
-                  <td className="px-3 py-3 text-sm font-semibold text-gray-900 text-right">
-                    €{vendor.totalSpend.toLocaleString('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+              {filteredTableVendors.length > 0 ? (
+                filteredTableVendors.map((vendor, index) => (
+                  <tr key={index} className="hover:bg-gray-50 transition-colors">
+                    <td className="px-3 py-3 text-sm text-gray-900 truncate max-w-[150px]">
+                      {vendor.vendorName}
+                    </td>
+                    <td className="px-3 py-3 text-sm text-gray-700 text-center">
+                      {vendor.invoiceCount}
+                    </td>
+                    <td className="px-3 py-3 text-sm font-semibold text-gray-900 text-right">
+                      €{vendor.totalSpend.toLocaleString('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                    </td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan={3} className="px-3 py-6 text-center text-sm text-gray-500">
+                    No vendors found matching &quot;{tableSearchQuery}&quot;
                   </td>
                 </tr>
-              ))}
+              )}
             </tbody>
           </table>
         </div>

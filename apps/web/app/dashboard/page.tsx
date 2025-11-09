@@ -42,15 +42,17 @@ export default function DashboardPage() {
   const [cashOutflow, setCashOutflow] = useState<CashOutflow[]>([])
   const [loading, setLoading] = useState(true)
 
+  const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'
+
   useEffect(() => {
     const fetchData = async () => {
       try {
         const [statsRes, trendsRes, vendorsRes, categoryRes, outflowRes] = await Promise.all([
-          fetch('/api/stats'),
-          fetch('/api/invoice-trends'),
-          fetch('/api/vendors/top10'),
-          fetch('/api/category-spend'),
-          fetch('/api/cash-outflow'),
+          fetch(`${apiUrl}/stats`),
+          fetch(`${apiUrl}/invoice-trends`),
+          fetch(`${apiUrl}/vendors/top10`),
+          fetch(`${apiUrl}/category-spend`),
+          fetch(`${apiUrl}/cash-outflow`),
         ])
 
         const [statsData, trendsData, vendorsData, categoryData, outflowData] = await Promise.all([
@@ -74,7 +76,7 @@ export default function DashboardPage() {
     }
 
     fetchData()
-  }, [])
+  }, [apiUrl])
 
   if (loading) {
     return (
